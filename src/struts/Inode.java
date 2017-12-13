@@ -83,7 +83,7 @@ public class Inode implements Serializable{
 
     @Override
     public String toString() {
-        return "Inode{" +
+        return "InodeJNI{" +
                 "no=" + no +
                 ", is_file=" + is_file +
                 ", size=" + size +
