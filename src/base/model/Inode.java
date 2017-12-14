@@ -1,28 +1,28 @@
-package struts;
-
-import java.io.Serializable;
+package base.model;
 
 /**
  * Created by MurphySL on 2017/12/11 10:40
  */
-public class Inode implements Serializable{
-    private static final long serialVersionUID = 6893572105707640688L;
+public class Inode{
 
     private int no;
     private boolean is_file;
     private long size;
     private int block_num;
     private int block_start;
-    private User owner;
+    private String owner;
     private String power;
-    private Inode next;
 
-    public Inode getNext() {
-        return next;
-    }
+    public Inode(){}
 
-    public void setNext(Inode next) {
-        this.next = next;
+    public Inode(int no, boolean is_file, long size, int block_num, int block_start, String owner, String power) {
+        this.no = no;
+        this.is_file = is_file;
+        this.size = size;
+        this.block_num = block_num;
+        this.block_start = block_start;
+        this.owner = owner;
+        this.power = power;
     }
 
     public int getNo() {
@@ -57,11 +57,11 @@ public class Inode implements Serializable{
         this.block_start = block_start;
     }
 
-    public User getOwner() {
+    public String getOwner() {
         return owner;
     }
 
-    public void setOwner(User owner) {
+    public void setOwner(String owner) {
         this.owner = owner;
     }
 

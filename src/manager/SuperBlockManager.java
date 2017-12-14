@@ -1,6 +1,6 @@
 package manager;
 
-import struts.SuperBlock;
+import base.model.SuperBlock;
 
 import java.io.*;
 

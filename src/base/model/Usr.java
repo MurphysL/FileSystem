@@ -1,20 +1,21 @@
 package base.model;
 
 /**
+ * 暂时不添加用户权限-SU
+ *
  * Created by MurphySL on 2017/12/13 10:02
  */
 public class Usr {
 
-    private String name = "";
-    private String psw = "";
+    private String name;
+    private String psw;
     private short su;
 
     public Usr(){}
 
-    public Usr(String name, String psw, short su) {
+    public Usr(String name, String psw) {
         this.name = name;
         this.psw = psw;
-        this.su = su;
     }
 
     public String getName() {

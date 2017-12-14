@@ -1,5 +1,8 @@
 package struts;
 
+import base.model.DirBlock;
+import base.model.Inode;
+
 /**
  * Created by MurphySL on 2017/12/11 16:54
  */

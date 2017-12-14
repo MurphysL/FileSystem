@@ -1,5 +1,9 @@
 package manager;
 
+import base.model.Block;
+import base.model.DirBlock;
+import base.model.Inode;
+import base.model.SuperBlock;
 import struts.*;
 
 import java.util.HashMap;
@@ -40,7 +44,7 @@ public class BlockManger implements Manager<Block>{
         superBlock.setInodeNum(-- inodeNum);
         superBlock.setBlockNum(-- blockNum);
 
-        if(superBlock.getNode() == null)
+       /* if(superBlock.getNode() == null)
             superBlock.setNode(inode);
         else{
             Inode inode1 = superBlock.getNode();
@@ -58,7 +62,7 @@ public class BlockManger implements Manager<Block>{
                 dir1 = dir1.getNext();
             }
             dir1.setNext(dir);
-        }
+        }*/
 
         return new Dir(inode, dir);
     }

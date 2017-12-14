@@ -1,23 +1,20 @@
-package struts;
-
-import sun.dc.pr.PRError;
-
-import java.io.Serializable;
+package base.model;
 
 /**
  * Created by MurphySL on 2017/12/11 10:27
  */
-public class SuperBlock implements Serializable{
-    private static final long serialVersionUID = 6644812098746905862L;
+public class SuperBlock{
 
     private int inodeNum;
     private int blockNum;
     private long update_time;
-    private Inode node;
-    private Block block;
 
-    public static long getSerialVersionUID() {
-        return serialVersionUID;
+    public SuperBlock(){}
+
+    public SuperBlock(int inodeNum, int blockNum, long update_time) {
+        this.inodeNum = inodeNum;
+        this.blockNum = blockNum;
+        this.update_time = update_time;
     }
 
     public int getInodeNum() {
@@ -42,22 +39,6 @@ public class SuperBlock implements Serializable{
 
     public void setUpdate_time(long update_time) {
         this.update_time = update_time;
-    }
-
-    public Inode getNode() {
-        return node;
-    }
-
-    public void setNode(Inode node) {
-        this.node = node;
-    }
-
-    public Block getBlock() {
-        return block;
-    }
-
-    public void setBlock(Block block) {
-        this.block = block;
     }
 
     @Override

@@ -1,12 +1,9 @@
-package struts;
-
-import java.io.Serializable;
+package base.model;
 
 /**
  * Created by MurphySL on 2017/12/11 10:40
  */
-public abstract class Block implements Serializable{
-    private static final long serialVersionUID = -5921279516964974128L;
+public abstract class Block{
 
     protected int no;
     protected byte[] block = new byte[1024 * 1024];

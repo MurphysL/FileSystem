@@ -1,9 +1,11 @@
+import base.model.DirBlock;
+import base.model.Inode;
+import base.model.SuperBlock;
 import manager.BlockManger;
 import manager.SuperBlockManager;
 import struts.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -49,7 +51,7 @@ public class Client {
     }
 
     private static void printInitInfo() {
-        SuperBlock superBlock = superBlockManager.deserialize();
+        /*SuperBlock superBlock = superBlockManager.deserialize();
         System.out.println("空闲 inode 数 / 总 inode 数 : " + superBlock.getInodeNum() + "/" + superBlock.getInodeNum());
         System.out.println("空闲 block 数 / 总 block 数 : " + superBlock.getBlockNum() + "/" + superBlock.getBlockNum());
         Inode node = superBlock.getNode();
@@ -69,7 +71,7 @@ public class Client {
                     System.out.println(block.getDirName());
             }
             node = node.getNext();
-        }
+        }*/
     }
 
     private static void init(){

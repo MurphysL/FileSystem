@@ -10,9 +10,9 @@ extern "C" {
 /*
  * Class:     jni_DiskJNI
  * Method:    insertUsr
- * Signature: (Lbase/model/Usr;)V
+ * Signature: (Lbase/model/Usr;)I
  */
-JNIEXPORT void JNICALL Java_jni_DiskJNI_insertUsr
+JNIEXPORT jint JNICALL Java_jni_DiskJNI_insertUsr
   (JNIEnv *, jobject, jobject);
 
 /*
@@ -26,9 +26,9 @@ JNIEXPORT void JNICALL Java_jni_DiskJNI_deleteUsr
 /*
  * Class:     jni_DiskJNI
  * Method:    updateUsr
- * Signature: (Lbase/model/Usr;)V
+ * Signature: (Lbase/model/Usr;)I
  */
-JNIEXPORT void JNICALL Java_jni_DiskJNI_updateUsr
+JNIEXPORT jint JNICALL Java_jni_DiskJNI_updateUsr
   (JNIEnv *, jobject, jobject);
 
 /*
@@ -46,6 +46,102 @@ JNIEXPORT jint JNICALL Java_jni_DiskJNI_selectUsr
  */
 JNIEXPORT jobject JNICALL Java_jni_DiskJNI_selectAllUsr
   (JNIEnv *, jobject);
+
+/*
+ * Class:     jni_DiskJNI
+ * Method:    insertInode
+ * Signature: (Lbase/model/Inode;)I
+ */
+JNIEXPORT jint JNICALL Java_jni_DiskJNI_insertInode
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     jni_DiskJNI
+ * Method:    deleteInode
+ * Signature: (Lbase/model/Inode;)V
+ */
+JNIEXPORT void JNICALL Java_jni_DiskJNI_deleteInode
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     jni_DiskJNI
+ * Method:    updateInode
+ * Signature: (Lbase/model/Inode;)I
+ */
+JNIEXPORT jint JNICALL Java_jni_DiskJNI_updateInode
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     jni_DiskJNI
+ * Method:    selectInode
+ * Signature: (Lbase/model/Inode;)I
+ */
+JNIEXPORT jint JNICALL Java_jni_DiskJNI_selectInode
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     jni_DiskJNI
+ * Method:    insertSuper
+ * Signature: (Lbase/model/SuperBlock;)I
+ */
+JNIEXPORT jint JNICALL Java_jni_DiskJNI_insertSuper
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     jni_DiskJNI
+ * Method:    deleteSuper
+ * Signature: (Lbase/model/SuperBlock;)V
+ */
+JNIEXPORT void JNICALL Java_jni_DiskJNI_deleteSuper
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     jni_DiskJNI
+ * Method:    updateSuper
+ * Signature: (Lbase/model/SuperBlock;)I
+ */
+JNIEXPORT jint JNICALL Java_jni_DiskJNI_updateSuper
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     jni_DiskJNI
+ * Method:    selectSuper
+ * Signature: (Lbase/model/SuperBlock;)I
+ */
+JNIEXPORT jint JNICALL Java_jni_DiskJNI_selectSuper
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     jni_DiskJNI
+ * Method:    insertBlock
+ * Signature: (Lbase/model/Block;)I
+ */
+JNIEXPORT jint JNICALL Java_jni_DiskJNI_insertBlock
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     jni_DiskJNI
+ * Method:    deleteBlock
+ * Signature: (Lbase/model/Block;)V
+ */
+JNIEXPORT void JNICALL Java_jni_DiskJNI_deleteBlock
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     jni_DiskJNI
+ * Method:    updateBlock
+ * Signature: (Lbase/model/Block;)I
+ */
+JNIEXPORT jint JNICALL Java_jni_DiskJNI_updateBlock
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     jni_DiskJNI
+ * Method:    selectBlock
+ * Signature: (Lbase/model/Block;)I
+ */
+JNIEXPORT jint JNICALL Java_jni_DiskJNI_selectBlock
+  (JNIEnv *, jobject, jobject);
 
 #ifdef __cplusplus
 }

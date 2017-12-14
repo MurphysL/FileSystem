@@ -1,8 +1,6 @@
 package manager;
 
-import struts.Inode;
-
-import java.io.*;
+import base.model.Inode;
 
 /**
  * Created by MurphySL on 2017/12/11 15:52
