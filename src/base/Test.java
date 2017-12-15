@@ -17,7 +17,7 @@ public class Test {
         Usr usr2 = new Usr("Name", "HelloWorld");
         usrPresenter.insert(usr2);
 
-        // System.out.println(usrPresenter.select(usr));
+        System.out.println(usrPresenter.select(usr));
 
         ArrayList<Usr> list = usrPresenter.selectAll();
         for(Usr u : list){

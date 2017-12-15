@@ -5,29 +5,30 @@
 #include "jni_DiskJNI.h"
 
 #define DISK "disk"
+
 #define USR_AREA_SIZE 1024
 #define USR_AREA_BEGIN 0
 #define USR_SIZE 25
 
-#define SUPER_SIZE  512
+#define SUPER_AREA_SIZE 512
 #define SUPER_BEGIN 1024
 #define SUPER_SIZE 9
 
-#define INODE_BITMAP_SIZE 1024
+#define INODE_BITMAP_AREA_SIZE 1024
 #define INODE_BITMAP_BEGIN 2048
 #define INODE_BITMAP_SIZE 1024
 
-#define DATA_BITMAP_SIZE 10240
+#define DATA_BITMAP_AREA_SIZE 10240
 #define DATA_BITMAP_BEGIN 3096
 #define DATA_BITMAP_SIZE 10240
 
-#define INODE_TABLE_SIZE 51200
-#define INODE_TABEL_BEGIN 13336
-#define INODE_TABEL_SIZE 1066
+#define INODE_TABLE_AREA_SIZE 51200
+#define INODE_TABLE_BEGIN 13336
+#define INODE_TABLE_SIZE 984
 
-#define DATA_TABLE_SIZE 10485760
-#define DATA_TABEL_BEGIN 64536
-#define DAT_TABEL_SIZE 10840
+#define DATA_TABLE_AREA_SIZE 10421760
+#define DATA_TABLE_BEGIN 64536
+#define DATA_TABLE_SIZE 9578
 
 #define FILE_NAME_MAX 56
 
@@ -41,30 +42,72 @@ typedef unsigned char byte;
 // 6.用户一次性存储 520bytes 后异常
 ///
 
+// 60 bytes
+typedef struct Pair{
+    char file_name[FILE_NAME_MAX];
+    long inode_no;
+}Pair;
+
+// 40 bytes, largest 25 usr
 typedef struct Usr{
     char name[12];
     char psw[12];
-    short flag;
-    short su;
+    short flag; // 是否删除
+    short su;   // 用户类型
     struct Usr* next;
 }Usr;
 
+// 56 bytes
 typedef struct SuperBlock{
-    int inode_num;
-    int block_num;
+    int mount;
+    long ver;
+    long block_size;
+    long inode_size;
+    long inode_begin;
+    long data_begin;
+    long data_size;
+    long inode_num;
+    long data_num;
+    long remain_inode_num;
+    long remain_data_num;
+    long mount_time;
     long last_write_time;
-    long last_read_time;
+    int valid;
 }SuperBlock;
 
+// 52 bytes
 typedef struct Inode{
     int no;
-    int size;
-    int is_file;
-    int block_num;
-    int block_start;
-    Usr owner;
-    //权限
+    long size;
+    int flag;
+    long data_num;
+    long data_begin;
+    char owner[12];
+    int power;
+    long create_time;
+    long update_time;
+    long read_time;
+    int delete;
 }Inode;
+
+// 1088 bytes
+typedef struct BlockFile{
+    long no;
+    int flag;
+    byte data[1024];
+    long next;
+    byte fill[48]; // 填充位
+    int delete;
+}BlockFile;
+
+// 1088 bytes
+typedef struct BlockDir{
+    long no;
+    int flag;
+    char name[FILE_NAME_MAX];
+    Pair file_info[17];
+    int delete;
+}BlockDir;
 
 int write_usr(Usr* usr){
     Usr* head = (Usr *)malloc(sizeof(Usr));
