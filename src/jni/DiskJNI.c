@@ -7,18 +7,38 @@
 #define DISK "disk"
 #define USR_AREA_SIZE 1024
 #define USR_AREA_BEGIN 0
-#define USR_UNIT_SIZE 40
 #define USR_SIZE 25
 
-#define SUPER_BLOCK_AREA_SIZE 524288
-#define SUPER_BLOCK_AREA_BEGIN 1025
+#define SUPER_SIZE  512
+#define SUPER_BEGIN 1024
+#define SUPER_SIZE 9
 
+#define INODE_BITMAP_SIZE 1024
+#define INODE_BITMAP_BEGIN 2048
+#define INODE_BITMAP_SIZE 1024
+
+#define DATA_BITMAP_SIZE 10240
+#define DATA_BITMAP_BEGIN 3096
+#define DATA_BITMAP_SIZE 10240
+
+#define INODE_TABLE_SIZE 51200
+#define INODE_TABEL_BEGIN 13336
+#define INODE_TABEL_SIZE 1066
+
+#define DATA_TABLE_SIZE 10485760
+#define DATA_TABEL_BEGIN 64536
+#define DAT_TABEL_SIZE 10840
+
+#define FILE_NAME_MAX 56
+
+typedef unsigned char byte;
 
 ////
 // WRAN:
 // 3.用户权限
 // 4.用户修改
 // 5.用户区读取边界
+// 6.用户一次性存储 520bytes 后异常
 ///
 
 typedef struct Usr{
@@ -53,8 +73,8 @@ int write_usr(Usr* usr){
     FILE *fr = fopen(DISK, "r+");
     FILE *fw = fopen(DISK, "r+");
 
-    while(fread(head, sizeof(Usr), 1, fr) != 0){
-        if(head->flag == 0)
+    while(area_num < USR_SIZE && fread(head, sizeof(Usr), 1, fr) != 0){
+        if(head->flag == 0 && white_area == -1)
             white_area = area_num;
 
         if(!strcmp(usr->name, head->name) || area_num >= USR_SIZE) {
@@ -75,6 +95,8 @@ int write_usr(Usr* usr){
     fclose(fw);
     fclose(fr);
 
+    printf("jni insert: finish ");
+
     return 1;
 }
 
@@ -84,7 +106,7 @@ void delete_usr(Usr* usr){
     int area_num = 0;
 
     Usr* tmp = (Usr*)malloc(sizeof(Usr));
-    while(fread(tmp, sizeof(Usr), 1, fr) != 0){
+    while(area_num < USR_SIZE && fread(tmp, sizeof(Usr), 1, fr) != 0){
         if(strcmp(usr->name, tmp->name) == 0 && strcmp(usr->psw, tmp->psw) == 0 && tmp->flag == 1){
             tmp->flag = 0;
             fseek(fw, area_num * sizeof(Usr), 1);
@@ -103,7 +125,8 @@ void delete_usr(Usr* usr){
 int find_usr(Usr* usr){
     FILE* fr = fopen(DISK, "r");
     Usr* tmp = (Usr*)malloc(sizeof(Usr));
-    while(fread(tmp, sizeof(Usr), 1, fr) != 0)
+    int area_num = 0;
+    while(area_num < USR_SIZE && fread(tmp, sizeof(Usr), 1, fr) != 0)
         if(0 == strcmp(usr->name, tmp->name) && 0 == strcmp(usr->psw, tmp->psw) && tmp->flag == 1)
             return 1;
 
@@ -115,7 +138,8 @@ int update_usr(Usr* usr){
     FILE* fr = fopen(DISK, "r");
     FILE* fw = fopen(DISK, "r+");
     Usr* tmp = (Usr*)malloc(sizeof(Usr));
-    while(fread(tmp, sizeof(Usr), 1, fr) != 0)
+    int area_num = 0;
+    while(area_num < USR_SIZE && fread(tmp, sizeof(Usr), 1, fr) != 0)
         if(0 == strcmp(usr->name, tmp->name) && tmp->flag == 1) {
             strcpy(tmp->psw, usr->psw);
             fwrite(tmp, sizeof(Usr), 1, fw);
@@ -153,7 +177,7 @@ JNIEXPORT jint JNICALL Java_jni_DiskJNI_insertUsr (JNIEnv *env, jobject obj, job
 
     jshort su = (*env)->GetShortField(env, obj_usr, suFieldID);
 
-    printf("jni: su:%d name:%s psw:%s", su, c_name, c_psw);
+    printf("jni insert: su:%d name:%s psw:%s\n", su, c_name, c_psw);
 
     Usr usr;
     strcpy(usr.name, c_name);
@@ -288,7 +312,7 @@ JNIEXPORT jobject JNICALL Java_jni_DiskJNI_selectAllUsr (JNIEnv *env, jobject ob
     FILE *file = fopen(DISK, "r");
     int area_num = 0;
 
-    while(fread(head, sizeof(Usr), 1, file) != 0){
+    while(area_num < USR_SIZE && fread(head, sizeof(Usr), 1, file) != 0){
         area_num ++;
         if(head->flag != 0){
             printf("name : %s psw : %s flag : %d\n", head->name, head->psw, head->flag);

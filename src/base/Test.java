@@ -11,11 +11,11 @@ import java.util.ArrayList;
 public class Test {
     public static void main(String[] args){
         UsrPresenter usrPresenter = new UsrPresenter();
-        //Usr usr = new Usr("MurphySL", "yq578797");
-        //usrPresenter.insert(usr);
+        Usr usr = new Usr("MurphySL", "yq578797");
+        usrPresenter.insert(usr);
 
-       /* Usr usr2 = new Usr("Name", "HelloWorld");
-        usrPresenter.insert(usr2);*/
+        Usr usr2 = new Usr("Name", "HelloWorld");
+        usrPresenter.insert(usr2);
 
         // System.out.println(usrPresenter.select(usr));
 
