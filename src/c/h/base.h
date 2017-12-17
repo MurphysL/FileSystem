@@ -1,0 +1,49 @@
+//
+// Created by MurphySL on 2017/12/17.
+//
+#include "time.h"
+
+#ifndef FILESYSTEM_BASE_H
+#define FILESYSTEM_BASE_H
+
+#define DISK "disk"
+
+#define VER 1
+
+#define USR_SIZE 25
+#define USR_NAME_MAX 12
+#define USR_PSW_MAX 12
+
+#define SUPER_AREA_SIZE 512
+#define SUPER_BEGIN 1024
+#define SUPER_SIZE 7
+
+#define INODE_BITMAP_AREA_SIZE 1024
+#define INODE_BITMAP_BEGIN 2048
+#define INODE_BITMAP_SIZE 1024
+
+#define DATA_BITMAP_AREA_SIZE 10240
+#define DATA_BITMAP_BEGIN 3096
+#define DATA_BITMAP_SIZE 10240
+
+#define INODE_TABLE_AREA_SIZE 51200
+#define INODE_TABLE_BEGIN 13336
+#define INODE_TABLE_SIZE 711
+
+#define DATA_TABLE_AREA_SIZE 10421760
+#define DATA_TABLE_BEGIN 64536
+#define DATA_TABLE_SIZE 9614
+
+#define FILE_NAME_MAX 52
+#define FILE_SIZE_MAX 17
+
+#define DELETED 0
+#define NOT_DELETED 1
+#define TYPE_DIR 1
+#define TYPE_FILE 0
+
+#define MOUNTED 1
+
+typedef unsigned char byte;
+
+#endif //FILESYSTEM_BASE_H
