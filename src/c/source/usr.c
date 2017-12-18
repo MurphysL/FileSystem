@@ -53,6 +53,9 @@ int write_usr(Usr* usr){
 }
 
 void delete_usr(Usr* usr){
+    if(usr == NULL)
+        return;
+
     FILE* fr = fopen(DISK, "r+");
     FILE* fw = fopen(DISK, "r+");
     int area_num = 0;
@@ -73,6 +76,9 @@ void delete_usr(Usr* usr){
 }
 
 int update_usr(Usr* usr){
+    if(usr == NULL)
+        return 0;
+
     FILE* fr = fopen(DISK, "r");
     FILE* fw = fopen(DISK, "r+");
     int area_num = 0;

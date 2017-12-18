@@ -1,13 +1,18 @@
 //
 // Created by MurphySL on 2017/12/17.
+// Finished by MurphySL on 2017/12/18
+//
+// 待修改 => /etc/passwd 文件
 //
 
-#include "base.h"
+
 
 #ifndef FILESYSTEM_USR_H
 #define FILESYSTEM_USR_H
 
-// 40 bytes, largest 25 usr
+#include "base.h"
+
+// 40 bytes
 typedef struct Usr{
     char name[USR_NAME_MAX];
     char psw[USR_PSW_MAX];
