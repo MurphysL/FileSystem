@@ -1,13 +1,13 @@
 package base.presenter
 
-import jni.DiskJNI
+import jni.FileJNI
 
 /**
  *
  * Created by MurphySL on 2017/12/13 19:29
  */
 abstract class Presenter<in T>{
-    protected val jni : DiskJNI = DiskJNI()
+    protected val jni : FileJNI = FileJNI()
 
     abstract fun insert(t: T) : Int
 

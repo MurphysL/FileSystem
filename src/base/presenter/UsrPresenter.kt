@@ -8,14 +8,14 @@ import base.model.Usr
  */
 class UsrPresenter : Presenter<Usr>() {
 
-    override fun insert(t: Usr): Int = jni.insertUsr(t)
+    override fun insert(t: Usr): Int = 1
 
-    override fun delete(t: Usr) = jni.deleteUsr(t)
+    override fun delete(t: Usr) = Unit
 
-    override fun update(t: Usr) : Int = jni.updateUsr(t)
+    override fun update(t: Usr) : Int = 1
 
-    override fun select(t: Usr) = jni.selectUsr(t)
+    override fun select(t: Usr): Int = 1
 
-    fun selectAll() : ArrayList<Usr> = jni.selectAllUsr()
+    fun selectAll() : ArrayList<Usr> = ArrayList()
 
 }
