@@ -11,6 +11,8 @@ Inode* create_dir(char name[FILE_NAME_MAX], char owner[USR_NAME_MAX], int power,
 
 Inode* create_file(char name[FILE_NAME_MAX], Inode *father);
 
-SuperBlock* update_remain_block();
+int delete_file(Inode*);
+
+int delete_dir(Inode*);
 
 #endif //FILESYSTEM_OP_H

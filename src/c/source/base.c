@@ -6,49 +6,36 @@
 #include <string.h>
 #include "../h/base.h"
 
+///// FINISH
 
 //// 修改前驱序号
 //// SUPER BLOCK 校验
+//// BITMAP DATA 错误
 
 
-////// SUPRE FINISH
+////// SUPRE
 void init_super_block(){
-    FILE* fr = fopen(DISK, "r");
-    fseek(fr, SUPER_BEGIN, 0);
-
     SuperBlock* tmp = (SuperBlock*)malloc(sizeof(SuperBlock));
+
+    time_t now;
+    time(&now);
 
     tmp->mount = MOUNTED;
     tmp->block_size = 1024;
     tmp->ver = VER;
-
     tmp->inode_area_size = INODE_TABLE_AREA_SIZE;
     tmp->inode_begin = INODE_TABLE_BEGIN;
     tmp->inode_size = INODE_TABLE_SIZE;
-
     tmp->data_area_size = DATA_TABLE_AREA_SIZE;
     tmp->data_size = DATA_TABLE_SIZE;
     tmp->data_begin = DATA_TABLE_BEGIN;
-
     tmp->remain_data_num = DATA_TABLE_SIZE;
     tmp->remain_inode_num = INODE_TABLE_SIZE;
-    tmp->mount = NOT_MOUNTED;
-
-    time_t now;
-    time(&now);
     tmp->last_write_time = now;
+    tmp->mount_time = now;
+    tmp->valid = 0;
 
-    FILE* fw = fopen(DISK, "r+");
-    fseek(fw, SUPER_BEGIN, 0);
-    int time = 0;
-    while(time < SUPER_SIZE){
-        fwrite(tmp, sizeof(SuperBlock), 1, fw);
-        fflush(fw);
-        time ++;
-    }
-
-    fclose(fw);
-    fclose(fr);
+    update_super_block(tmp);
 }
 
 SuperBlock* read_super_block(){
@@ -63,14 +50,15 @@ SuperBlock* read_super_block(){
 }
 
 void print_super_block(){
+    update_remain_block();
     SuperBlock* sb = read_super_block();
     if(sb == NULL)
         return;
 
     printf("SUPER_BLOCK =>\n block_size : %ld b, ver: %ld, inode_area_size: %.2ld kb, data_area_size: %.2ld kb,\n "
-                   "inode_begin: %.2ld, data_begin: %.2ld, inode_size:%ld, data_size: %ld, remain_inode: %ld, remain_data: %ld\n\n",
+                   "inode_begin: %.2ld M, data_begin: %.2ld M, remain_inode: %ld/%d, remain_data: %ld/%d\n\n",
            sb->block_size, sb->ver, (sb->inode_area_size / 1024), (sb->data_area_size / 1024), (sb->inode_begin/ 1024), (sb->data_begin/ 1024),
-           sb->inode_size, sb->data_size, sb->remain_inode_num, sb->remain_data_num);
+           sb->remain_inode_num, INODE_TABLE_SIZE, sb->remain_data_num, DATA_TABLE_SIZE);
 }
 
 int update_super_block(SuperBlock* sb){
@@ -87,6 +75,26 @@ int update_super_block(SuperBlock* sb){
     }
     fclose(fw);
     return 1;
+}
+
+SuperBlock* update_remain_block(){
+    SuperBlock* sb = read_super_block();
+
+    sb->remain_inode_num = INODE_TABLE_SIZE - get_inode_bitmap_num();
+    sb->remain_data_num = DATA_TABLE_SIZE - get_data_bitmap_num();
+    time_t now;
+    time(&now);
+    sb->last_write_time = now;
+
+    FILE* fw = fopen(DISK, "r+");
+    fseek(fw, SUPER_BEGIN, 0);
+    int time = 0;
+    while(time < SUPER_SIZE){
+        fwrite(sb, sizeof(SuperBlock), 1, fw);
+        fflush(fw);
+        time ++;
+    }
+    fclose(fw);
 }
 
 
@@ -118,14 +126,13 @@ void print_inode_bitmap(){
     fclose(fr);
 }
 
-void select_inode_bitmap(long no){
+void select_inode_bitmap(int no){
     if(no >= INODE_BITMAP_SIZE)
         return;
-    FILE *fw = fopen(DISK, "r+");
 
     byte flag = SELECT_BIT;
-    fseek(fw, INODE_BITMAP_BEGIN + sizeof(byte)*no, 0);
-
+    FILE* fw = fopen(DISK, "r+");
+    fseek(fw, INODE_BITMAP_BEGIN + no, 0);
     fputc(flag, fw);
     fflush(fw);
     fclose(fw);
@@ -137,14 +144,13 @@ void select_data_bitmap(long no){
     FILE *fw = fopen(DISK, "r+");
 
     byte flag = SELECT_BIT;
-    fseek(fw, DATA_BITMAP_BEGIN + sizeof(byte)*no, 0);
-
+    fseek(fw, DATA_BITMAP_BEGIN + no, 0);
     fputc(flag, fw);
     fflush(fw);
     fclose(fw);
 }
 
-void delete_inode_bitmap(long no){
+void delete_inode_bitmap(int no){
     if(no >= INODE_BITMAP_SIZE)
         return;
     FILE *fw = fopen(DISK, "r+");
@@ -164,12 +170,13 @@ void delete_data_bitmap(long no){
 
     byte flag = DESELECT_BIT;
     fseek(fw, sizeof(byte)*no + DATA_BITMAP_BEGIN, 0);
+
     fputc(flag, fw);
     fflush(fw);
     fclose(fw);
 }
 
-int find_inode_bitmap(long no){
+int find_inode_bitmap(int no){
     FILE *fr = fopen(DISK, "r");
     fseek(fr, sizeof(byte)*no + INODE_BITMAP_BEGIN, 0);
     byte flag = (byte) fgetc(fr);
@@ -197,11 +204,10 @@ long get_inode_bitmap_num(){
     int num = 0;
 
     FILE *fr = fopen(DISK, "rb");
-    fseek(fr, INODE_BITMAP_SIZE, 0);
+    fseek(fr, INODE_BITMAP_BEGIN, 0);
     int i;
-    for(i = 0 ;i < INODE_BITMAP_SIZE;i ++){
-
-        if(fgetc(fr) == '1')
+    for(i = 0 ;i < INODE_TABLE_SIZE;i ++){
+        if(fgetc(fr) == SELECT_BIT)
             num ++;
     }
     fclose(fr);
@@ -214,9 +220,9 @@ long get_data_bitmap_num(){
     FILE *fr = fopen(DISK, "rb");
     fseek(fr, DATA_BITMAP_BEGIN, 0);
     int i;
-    for(i = 0 ;i < DATA_BITMAP_BEGIN;i ++){
+    for(i = 0 ;i < DATA_TABLE_SIZE;i ++){
 
-        if(fgetc(fr) == '1')
+        if(fgetc(fr) == SELECT_BIT)
             num ++;
     }
     fclose(fr);
@@ -236,7 +242,7 @@ void copyPair(Pair* origin, Pair* new){
 }
 
 int find_empty_block(){
-    FILE *fr = fopen(DISK, "r");
+    FILE *fr = fopen(DISK, "rb");
     int block_num = 0;
 
     BlockDir* tmp = (BlockDir *)malloc(sizeof(BlockDir));
@@ -244,6 +250,7 @@ int find_empty_block(){
     while(block_num < DATA_TABLE_SIZE && fread(tmp, sizeof(BlockDir), 1, fr) != 0){
         if(tmp->delete == DELETED)
             return block_num;
+
         block_num ++;
     }
 
@@ -259,7 +266,13 @@ void print_pair(Pair* pair){
         Pair p = pair[i];
         if(pair[i].delete == DELETED)
             return;
-        printf("FILE => no:%d, file_name: %s, inode_no: %d, delete: %d\n", i, p.file_name, p.inode_no, p.delete);
+        printf("    FILE => no:%d, file_name: %s, inode_no: %d, delete: %d\n", i, p.file_name, p.inode_no, p.delete);
+        Inode* inode = find_inode(p.inode_no);
+        if(inode->flag == TYPE_FILE){
+            printf("%ld\n", inode->data_begin);
+            BlockFile* file = find_file_block(inode->data_begin);
+            print_file_block(file);
+        }
     }
 }
 
@@ -270,8 +283,16 @@ int update_dir_pair(BlockDir* dir, Pair* pair){
     int i = 0;
     while(i < FILE_SIZE_MAX){
         Pair* p = dir->file_info + i;
+        i ++;
+        if(p->delete == DELETED)
+            continue;
         if(strcmp(p->file_name, pair->file_name) == 0)
             return 0;
+    }
+
+    i = 0;
+    while(i < FILE_SIZE_MAX){
+        Pair* p = dir->file_info + i;
         if(p->delete == DELETED){
             copyPair(p, pair);
             break;
@@ -287,6 +308,21 @@ int update_dir_pair(BlockDir* dir, Pair* pair){
     fclose(fw);
 
     return 1;
+}
+
+int find_pair(char name[FILE_NAME_MAX], Pair* pair){
+    if(pair == NULL)
+        return -1;
+    int i;
+    for(i = 0 ;i < FILE_SIZE_MAX;i ++){
+        Pair p = pair[i];
+        if(pair[i].delete == DELETED)
+            return -1;
+        if(strcmp(pair[i].file_name, name) == 0){
+            return pair[i].inode_no;
+        }
+    }
+    return -1;
 }
 
 
@@ -330,7 +366,7 @@ void print_inode(Inode* inode){
 }
 
 int find_empty_inode(){
-    FILE *fr = fopen(DISK, "r");
+    FILE *fr = fopen(DISK, "rb");
     int block_num = 0;
 
     Inode* tmp = (Inode *)malloc(sizeof(Inode));
@@ -349,7 +385,7 @@ Inode* find_inode(int no){
     if(no >= INODE_TABLE_SIZE)
         return  NULL;
 
-    FILE* fr = fopen(DISK, "r");
+    FILE* fr = fopen(DISK, "rb");
     Inode* tmp = (Inode*)malloc(sizeof(Inode));
 
     fseek(fr, INODE_TABLE_BEGIN + sizeof(Inode)*no, 0);
@@ -362,7 +398,7 @@ Inode* find_inode(int no){
 }
 
 Inode* create_inode(int flag, char ower[USR_NAME_MAX], int power){
-    FILE* fw = fopen(DISK, "r+");
+    FILE* fw = fopen(DISK, "rb+");
     int pos = find_empty_inode();
     Inode* inode = (Inode *)malloc(sizeof(Inode));
     inode->no = pos;
@@ -387,28 +423,29 @@ Inode* create_inode(int flag, char ower[USR_NAME_MAX], int power){
     return inode;
 }
 
-void delete_inode(int no){
+int delete_inode(int no){
     if(no >= INODE_TABLE_SIZE)
-        return;
+        return 0;
 
     Inode* inode = find_inode(no);
     if(inode == NULL)
-        return;
+        return 0;
 
     inode->delete = DELETED;
 
-    FILE* fw = fopen(DISK, "r+");
+    FILE* fw = fopen(DISK, "rb+");
     fseek(fw, sizeof(Inode) * no + INODE_TABLE_BEGIN, 0);
     fwrite(inode, sizeof(Inode), 1, fw);
     fflush(fw);
     fclose(fw);
+    return 1;
 }
 
 int update_inode(Inode* new){
     if(new == NULL)
         return 0;
 
-    FILE* fw = fopen(DISK, "r+");
+    FILE* fw = fopen(DISK, "rb+");
     fseek(fw, INODE_TABLE_BEGIN + sizeof(Inode) * new->no, 0);
     fwrite(new, sizeof(Inode), 1, fw);
     fflush(fw);
@@ -416,14 +453,38 @@ int update_inode(Inode* new){
     return 1;
 }
 
+void init_inode(){
+    FILE* fw = fopen(DISK, "rb+");
+    fseek(fw, INODE_TABLE_BEGIN, 0);
+    Inode* inode = (Inode*)malloc(sizeof(Inode));
+    inode->delete = DELETED;
+    int num = 0;
+    while(num < INODE_TABLE_SIZE){
+        fwrite(inode, sizeof(Inode), 1, fw);
+        num ++;
+    }
+}
 
+
+///// BLOCK
+void init_data(){
+    FILE* fw = fopen(DISK, "rb+");
+    fseek(fw, DATA_TABLE_BEGIN, 0);
+    BlockFile *block = (BlockFile* )malloc(sizeof(BlockFile));
+    block->delete = DELETED;
+    int num = 0;
+    while(num < DATA_TABLE_SIZE){
+        fwrite(block, sizeof(BlockFile), 1, fw);
+        num ++;
+    }
+}
 
 //// DIR
 BlockDir* find_dir_block(long no){
     if(no >= DATA_TABLE_SIZE)
         return NULL;
 
-    FILE* fr = fopen(DISK, "r");
+    FILE* fr = fopen(DISK, "rb");
     BlockDir* tmp = (BlockDir *)malloc(sizeof(BlockDir));
     fseek(fr, DATA_TABLE_BEGIN + sizeof(BlockDir)*no, 0);
 
@@ -435,26 +496,28 @@ BlockDir* find_dir_block(long no){
     return tmp;
 }
 
-void delete_dir_block(long no){
+int delete_dir_block(long no){
     if(no >= DATA_TABLE_SIZE)
-        return;
+        return 0;
 
     BlockDir* dir = find_dir_block(no);
     if(dir == NULL)
-        return;
+        return 0;
 
     dir->delete = DELETED;
 
-    FILE* fw = fopen(DISK, "r+");
+    FILE* fw = fopen(DISK, "rb+");
     fseek(fw, DATA_TABLE_SIZE + sizeof(BlockDir)*no, 0);
 
     fwrite(dir, sizeof(BlockDir), 1, fw);
     fflush(fw);
     fclose(fw);
+
+    return 1;
 }
 
 BlockDir* create_dir_block(char name[FILE_NAME_MAX]){
-    FILE *fw = fopen(DISK, "r+");
+    FILE *fw = fopen(DISK, "rb+");
 
     int pos = find_empty_block();
 
@@ -464,6 +527,7 @@ BlockDir* create_dir_block(char name[FILE_NAME_MAX]){
     strcpy(dir->name, name);
     dir->delete = NOT_DELETED;
 
+    // 初始化 Pair
     int i = 0;
     while(i < FILE_SIZE_MAX){
         Pair* pair = dir->file_info + i;
@@ -483,7 +547,7 @@ int update_dir_block(BlockDir* new){
     if(new == NULL)
         return 0;
 
-    FILE *fw = fopen(DISK, "r+");
+    FILE *fw = fopen(DISK, "rb+");
 
     fseek(fw, sizeof(BlockDir)*new->no + DATA_TABLE_SIZE, 1);
     fwrite(new, sizeof(BlockDir), 1, fw);
@@ -494,7 +558,7 @@ int update_dir_block(BlockDir* new){
 }
 
 void print_dir_block(BlockDir* dir){
-    printf("DIR==> no: %ld, flag: %d, dir_name: %s, delete: %d, file: \n", dir->no, dir->flag, dir->name, dir->delete);
+    printf("DIR ==> no:%ld, flag: %d, dir_name: %s, delete: %d, file: \n", dir->no, dir->flag, dir->name, dir->delete);
     print_pair(dir->file_info);
     printf("\n");
 }
@@ -509,11 +573,13 @@ BlockFile* find_file_block(long no){
     if(no >= DATA_TABLE_SIZE)
         return NULL;
 
-    FILE* fr = fopen(DISK, "r");
+    FILE* fr = fopen(DISK, "rb");
     BlockFile* tmp = (BlockFile *)malloc(sizeof(BlockFile));
     fseek(fr, DATA_TABLE_BEGIN + sizeof(BlockFile)*no, 0);
 
-    if(fread(tmp, sizeof(BlockFile), 1, fr) == 0 || tmp->delete == DELETED)
+    if(fread(tmp, sizeof(BlockFile), 1, fr) == 0)
+        return NULL;
+    if(tmp->delete == DELETED)
         return NULL;
 
     fclose(fr);
@@ -522,19 +588,20 @@ BlockFile* find_file_block(long no){
 }
 
 BlockFile* create_empty_file_block(){
-    FILE *fw = fopen(DISK, "r+");
+    FILE *fw = fopen(DISK, "rb+");
 
     int pos = find_empty_block();
+    //printf("find empty block : %d\n", pos);
 
     BlockFile* file = (BlockFile *)malloc(sizeof(BlockFile));
     file->no = pos;
     file->flag = TYPE_FILE;
+    file->next = DATA_TABLE_SIZE;
     file->delete = NOT_DELETED;
 
-    fseek(fw, sizeof(BlockFile)*pos + DATA_TABLE_SIZE, 1);
+    fseek(fw, sizeof(BlockFile)*pos + DATA_TABLE_BEGIN, 0);
     fwrite(file, sizeof(BlockFile), 1, fw);
     fflush(fw);
-    fclose(fw);
 
     return file;
 }
@@ -586,9 +653,9 @@ int update_file_block(BlockFile* new){
     if(new == NULL)
         return 0;
 
-    FILE *fw = fopen(DISK, "r+");
+    FILE *fw = fopen(DISK, "rb+");
 
-    fseek(fw, sizeof(BlockFile)*new->no + DATA_TABLE_SIZE, 1);
+    fseek(fw, sizeof(BlockFile)*new->no + DATA_TABLE_BEGIN, 0);
     fwrite(new, sizeof(BlockFile), 1, fw);
     fflush(fw);
     fclose(fw);
@@ -597,6 +664,12 @@ int update_file_block(BlockFile* new){
 }
 
 void print_file_block(BlockFile* file){
-    printf("no: %ld, flag: %d, new: %ld, delete: %d, file: ", file->no, file->flag, file->next, file->delete);
+    BlockFile* block = file;
+    while(block != NULL){
+        printf("no: %ld, flag: %d, next: %ld, delete: %d\n", file->no, file->flag, file->next, file->delete);
+        block = find_file_block(block->next);
+    }
+    printf("file print finish\n");
+
 }
 

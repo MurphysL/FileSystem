@@ -17,17 +17,23 @@ int userdel(char[USR_NAME_MAX], char[USR_PSW_MAX]);
 
 int su(char[USR_NAME_MAX]);
 
-void ls(BlockDir*);
+
+
+void ls(int);
 
 Inode* mount();
 
-int mkdir1(char[FILE_NAME_MAX], Inode*);
+int mkdir1(char[FILE_NAME_MAX], int);
 
-int touch(char[FILE_NAME_MAX], Inode*);
+int touch(char[FILE_NAME_MAX], int);
 
-int rm();
+int rm(int no);
 
-Inode* cd(char[1000], Inode*);
+int cd(char[FILE_NAME_MAX], int);
+
+int mv_in(char[FILE_NAME_MAX], int); // 移入
+
+int mv_out(int, char[FILE_NAME_MAX]); // 移除
 
 
 

@@ -72,32 +72,30 @@ Inode* create_file(char name[FILE_NAME_MAX], Inode *father) {
 
     Inode *inode = create_inode(TYPE_FILE, DEFAULT_USR, 0);
     BlockFile *file = create_empty_file_block();
-
     if (inode == NULL || file == NULL)
         return NULL;
-
     inode->data_begin = file->no;
-
     if (0 == update_inode(inode))
         return NULL;
-
+    // 更新目录
     BlockDir *f_block = find_dir_block(father->no);
     Pair *pair = (Pair *) malloc(sizeof(Pair));
     pair->delete = NOT_DELETED;
     strcpy(pair->file_name, name);
     pair->inode_no = inode->no;
-
     if (0 == update_dir_pair(f_block, pair))
         return NULL;
 
+    // 读取文件数据
     FILE *fr = fopen(name, "rb");
+
     long pioneer_no = file->no;
     int time = 0;
     long len = 0;
+    int block_num = 0;
     byte *b = (byte *) malloc(1);
     while (!feof(fr)) {
         BlockFile *f;
-        printf("123");
         if (time == 0) {
             f = file;
             time++;
@@ -108,14 +106,22 @@ Inode* create_file(char name[FILE_NAME_MAX], Inode *father) {
                 return NULL;
             }
 
+            //更新父 data block
             BlockFile *pioneer = find_file_block(pioneer_no);
+            if(pioneer == NULL)
+                return NULL;
             pioneer->next = f->no;
             if (update_file_block(pioneer) == 0) {
                 fclose(fr);
                 return NULL;
             }
+            printf("pionner : \n");
+            print_file_block(pioneer);
+            printf("3:");
+            print_file_block(find_file_block(3));
         }
 
+        //存储数据
         int size = 0;
         byte* data = f->data;
         while (size < 1024 && fread(b, 1, 1, fr) != 0) {
@@ -123,44 +129,70 @@ Inode* create_file(char name[FILE_NAME_MAX], Inode *father) {
             size++;
             len++;
         }
-
         if (update_file_block(f) == 0) {
             fclose(fr);
             return NULL;
         }
+        printf("now :");
+        print_file_block(f);
+        printf("3:");
+        print_file_block(find_file_block(3));
+
+        select_data_bitmap(f->no);
         pioneer_no = f->no;
+        block_num ++;
     }
 
     fclose(fr);
 
     inode->size = len;
-    int data_block_num = 0;
-    if(len % 10 != 0)
-        data_block_num += 1;
-    inode->data_num = data_block_num;
+    inode->data_num = block_num;
     if(update_inode(inode) == 0)
         return NULL;
 
-    printf("success file");
+    select_inode_bitmap(inode->no);
+
+    printf("success store file: size : %ld\n", len);
     return inode;
 }
 
-SuperBlock* update_remain_block(){
-    SuperBlock* sb = read_super_block();
-
-    sb->remain_inode_num -= get_inode_bitmap_num();
-    sb->remain_data_num -= get_data_bitmap_num();
-    time_t now;
-    time(&now);
-    sb->last_write_time = now;
-
-    FILE* fw = fopen(DISK, "r+");
-    fseek(fw, SUPER_BEGIN, 0);
-    int time = 0;
-    while(time < SUPER_SIZE){
-        fwrite(sb, sizeof(SuperBlock), 1, fw);
-        fflush(fw);
-        time ++;
+int delete_file(Inode* inode){
+    if(inode == NULL)
+        return 0;
+    BlockFile* file = find_file_block(inode->no);
+    BlockFile* tmp = file;
+    while(tmp != NULL){
+        tmp->delete = DELETED;
+        tmp = find_file_block(tmp->next);
     }
-    fclose(fw);
+
+    return delete_inode(inode->no);
 }
+
+int delete_dir(Inode* inode){
+    if(inode == NULL)
+        return 0;
+
+    BlockDir* dir = find_dir_block(inode->data_begin);
+    if(dir == NULL)
+        return 0;
+    Pair* pair = dir->file_info;
+    int i;
+    for(i = 0 ;i < FILE_SIZE_MAX;i ++){
+        if(pair[i].delete == DELETED)
+            break;
+        Inode* node = find_inode(pair[i].inode_no);
+        if(node->flag == TYPE_FILE){
+            delete_file(node);
+        }else{
+            delete_dir(node);
+        }
+
+        pair[i].delete = DELETED;
+    }
+
+    return delete_inode(inode->no);
+}
+
+
+

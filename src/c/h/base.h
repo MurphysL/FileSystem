@@ -56,6 +56,8 @@
 
 typedef unsigned char byte;
 
+// Inode - DataBlock 比例失衡
+
 
 // 72 bytes
 typedef struct SuperBlock{
@@ -84,25 +86,24 @@ typedef struct Pair{
 
 // 1084 bytes
 typedef struct BlockFile{
+    int delete;
     long no;
     int flag;
     byte data[1024];
     long next;
     byte fill[44]; // 填充位
-    int delete;
 }BlockFile;
 
 // 1084 bytes
 typedef struct BlockDir{
+    int delete;
     long no;
     int flag;
     char name[FILE_NAME_MAX];
     Pair file_info[FILE_SIZE_MAX];
-    int delete;
 }BlockDir;
 
-// 52 bytes
-// 72 bytes inode 控制 block 太多
+// 72 bytes
 typedef struct Inode{
     int no;
     long size;
@@ -127,16 +128,18 @@ void print_super_block();
 
 int update_super_block(SuperBlock* sb);
 
+SuperBlock* update_remain_block();
+
 
 
 
 
 ////// BITMAP
-void select_inode_bitmap(long no);
+void select_inode_bitmap(int no);
 
 void select_data_bitmap(long no);
 
-void delete_inode_bitmap(long no);
+void delete_inode_bitmap(int no);
 
 void delete_data_bitmap(long no);
 
@@ -144,7 +147,7 @@ void print_inode_bitmap();
 
 void print_data_bitmap();
 
-int find_inode_bitmap(long no);
+int find_inode_bitmap(int no);
 
 int find_data_bitmap(long no);
 
@@ -162,6 +165,8 @@ void print_pair(Pair*);
 
 int update_dir_pair(BlockDir* block, Pair* pair);
 
+int find_pair(char[FILE_NAME_MAX], Pair* pair);
+
 
 
 
@@ -175,12 +180,15 @@ Inode* find_inode(int no);
 
 Inode* create_inode(int flag, char ower[USR_NAME_MAX], int power);
 
-void delete_inode(int no);
+int delete_inode(int no);
 
 int update_inode(Inode* new);
 
+void init_inode();
 
 
+////DATA
+void init_data();
 
 
 //// DIR
@@ -190,7 +198,7 @@ void print_dir_file(BlockDir* dir);
 
 BlockDir* create_dir_block(char name[FILE_NAME_MAX]);
 
-void delete_dir_block(long no);
+int delete_dir_block(long no);
 
 int update_dir_block(BlockDir* new);
 
