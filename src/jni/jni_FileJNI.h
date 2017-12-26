@@ -34,10 +34,10 @@ JNIEXPORT jint JNICALL Java_jni_FileJNI_touch
 /*
  * Class:     jni_FileJNI
  * Method:    rm
- * Signature: (I)I
+ * Signature: (II)I
  */
 JNIEXPORT jint JNICALL Java_jni_FileJNI_rm
-  (JNIEnv *, jobject, jint);
+  (JNIEnv *, jobject, jint, jint);
 
 /*
  * Class:     jni_FileJNI
@@ -57,67 +57,19 @@ JNIEXPORT jint JNICALL Java_jni_FileJNI_cd
 
 /*
  * Class:     jni_FileJNI
- * Method:    mv
+ * Method:    mv_in
  * Signature: (Ljava/lang/String;I)I
  */
-JNIEXPORT jint JNICALL Java_jni_FileJNI_mv__Ljava_lang_String_2I
+JNIEXPORT jint JNICALL Java_jni_FileJNI_mv_1in
   (JNIEnv *, jobject, jstring, jint);
 
 /*
  * Class:     jni_FileJNI
- * Method:    mv
- * Signature: (II)I
- */
-JNIEXPORT jint JNICALL Java_jni_FileJNI_mv__II
-  (JNIEnv *, jobject, jint, jint);
-
-/*
- * Class:     jni_FileJNI
- * Method:    mv
- * Signature: (Ljava/lang/String;Ljava/lang/String;)I
- */
-JNIEXPORT jint JNICALL Java_jni_FileJNI_mv__Ljava_lang_String_2Ljava_lang_String_2
-  (JNIEnv *, jobject, jstring, jstring);
-
-/*
- * Class:     jni_FileJNI
- * Method:    mv
+ * Method:    mv_out
  * Signature: (ILjava/lang/String;)I
  */
-JNIEXPORT jint JNICALL Java_jni_FileJNI_mv__ILjava_lang_String_2
+JNIEXPORT jint JNICALL Java_jni_FileJNI_mv_1out
   (JNIEnv *, jobject, jint, jstring);
-
-/*
- * Class:     jni_FileJNI
- * Method:    cp
- * Signature: (Ljava/lang/String;I)I
- */
-JNIEXPORT jint JNICALL Java_jni_FileJNI_cp__Ljava_lang_String_2I
-  (JNIEnv *, jobject, jstring, jint);
-
-/*
- * Class:     jni_FileJNI
- * Method:    cp
- * Signature: (II)I
- */
-JNIEXPORT jint JNICALL Java_jni_FileJNI_cp__II
-  (JNIEnv *, jobject, jint, jint);
-
-/*
- * Class:     jni_FileJNI
- * Method:    cp
- * Signature: (ILjava/lang/String;)I
- */
-JNIEXPORT jint JNICALL Java_jni_FileJNI_cp__ILjava_lang_String_2
-  (JNIEnv *, jobject, jint, jstring);
-
-/*
- * Class:     jni_FileJNI
- * Method:    find
- * Signature: (Ljava/lang/String;)Ljava/util/List;
- */
-JNIEXPORT jobject JNICALL Java_jni_FileJNI_find
-  (JNIEnv *, jobject, jstring);
 
 #ifdef __cplusplus
 }

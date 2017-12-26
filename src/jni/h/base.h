@@ -86,21 +86,21 @@ typedef struct Pair{
 
 // 1084 bytes
 typedef struct BlockFile{
+    int delete;
     long no;
     int flag;
     byte data[1024];
     long next;
     byte fill[44]; // 填充位
-    int delete;
 }BlockFile;
 
 // 1084 bytes
 typedef struct BlockDir{
+    int delete;
     long no;
     int flag;
     char name[FILE_NAME_MAX];
     Pair file_info[FILE_SIZE_MAX];
-    int delete;
 }BlockDir;
 
 // 72 bytes
@@ -127,3 +127,94 @@ SuperBlock* read_super_block();
 void print_super_block();
 
 int update_super_block(SuperBlock* sb);
+
+SuperBlock* update_remain_block();
+
+
+
+
+
+////// BITMAP
+void select_inode_bitmap(int no);
+
+void select_data_bitmap(long no);
+
+void delete_inode_bitmap(int no);
+
+void delete_data_bitmap(long no);
+
+void print_inode_bitmap();
+
+void print_data_bitmap();
+
+int find_inode_bitmap(int no);
+
+int find_data_bitmap(long no);
+
+long get_inode_bitmap_num();
+
+long get_data_bitmap_num();
+
+
+///// COMMON
+void copyPair(Pair* new, Pair* origin);
+
+int find_empty_block();
+
+void print_pair(Pair*);
+
+int update_dir_pair(BlockDir* block, Pair* pair);
+
+int find_pair(char[FILE_NAME_MAX], Pair* pair);
+
+
+
+
+
+////// INODE
+void print_inode(Inode* inode);
+
+int find_empty_inode();
+
+Inode* find_inode(int no);
+
+Inode* create_inode(int flag, char ower[USR_NAME_MAX], int power);
+
+int delete_inode(int no);
+
+int update_inode(Inode* new);
+
+void init_inode();
+
+
+////DATA
+void init_data();
+
+
+//// DIR
+void print_dir_block(BlockDir* dir);
+
+BlockDir* create_dir_block(char name[FILE_NAME_MAX]);
+
+int delete_dir_block(long no);
+
+int update_dir_block(BlockDir* new);
+
+BlockDir* find_dir_block(long no);
+
+BlockDir* get_root_block();
+
+
+
+//// FILE
+void print_file_block(BlockFile* file);
+
+BlockFile* create_empty_file_block();
+
+void delete_file_block(long no);
+
+int update_file_block(BlockFile* file);
+
+BlockFile* find_file_block(long no);
+
+#endif //FILESYSTEM_BASE_H

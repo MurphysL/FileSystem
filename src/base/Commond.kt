@@ -22,7 +22,7 @@ class Commond{
         for(dir in dirs){
             aim = jni.cd(dir, aim)
             if(aim == -1)
-                return aim;
+                return aim
         }
 
         return aim
@@ -32,16 +32,6 @@ class Commond{
 
     fun touch(name : String, no : Int) = jni.touch(name, no)
 
-    fun rm(no : Int) = jni.rm(no)
-
-    fun mv(old : Int, now : Int) = jni.mv(old, now)
-
-    fun mv(old : String, now : String) = jni.mv(old, now)
-
-    fun cp(file : String, no : Int) = jni.cp(file, no)
-
-    fun cp(old : Int, now : Int) = jni.cp(old, now)
-
-    fun find(name : String) : List<String> = jni.find(name)
+    fun rm(no : Int, father : Int) = jni.rm(no, father)
 
 }
